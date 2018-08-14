@@ -22,7 +22,7 @@ export default class Internal extends Component {
 
     addComment = (comment, key) => {
         const set = this.state.data[key]
-        set[`comment${Date.now()}`] = comment
+        set["comment"][`comment${Date.now()}`] = comment
         this.setState({ set }, () => {console.log(this.state.data)})
     }
 
@@ -86,7 +86,8 @@ class RequestInternalForm extends Component {
               collection: this.collection.value,
               tray: this.tray.value,
               shelf: this.shelf.value,
-              notes: this.notes.value
+              notes: this.notes.value,
+              comment: {}
           }
           this.props.handleUpdate(values)
           this.requestForm.reset()
@@ -207,6 +208,12 @@ class RequestInternalDisplay extends Component {
               </dl>
               </div>
               </div>
+              {data.comment ? 
+                Object.keys(data.comment).map((items, index) => {
+                    return <p className="alert alert-secondary" key={index}>{data.comment[items].comment}</p>
+                })
+                :  ''
+              }
               <button className="btn btn-primary btn option-button" onClick={(e) => this.deleteRequest(data.id)}>Finished</button>
               <button className="btn btn-primary btn option-button" onClick={() => this.props.showComment()}>Add Comment</button>
             </div>

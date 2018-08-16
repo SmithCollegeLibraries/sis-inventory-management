@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import Load from '../util/load'
 import ContentSearch from '../util/search'
 import Updates from '../util/updates'
+import queryString from 'query-string'
+import _ from 'lodash'
+const electron = window.require('electron');
 const fs = window.require('fs');
 const path = window.require('path');
 const fileName = 'paging.json';
@@ -11,31 +14,104 @@ export default class PagingDisplay extends Component {
 
     state = {
         pick: {},
-        loading: false
+        loading: false,
+        searchObject: {},
+        count: 0,
+        morningCount: 0,
+        eveningCount: 0
     }
 
-    componentDidMount(){
+    componentDidMount = async () => {
         const results = Load.loadFromFile(dataLocation)
+        const morning = await ContentSearch.pagingSlips('morning')
+        const evening = await ContentSearch.pagingSlips('evening')
         this.setState({
-            pick: results.items
+            pick: results,
+            count: results.length,
+            morningCount: morning.length,
+            eveningCount: evening.length
         })
     }
 
-    handleDelete = (key, barcode) =>{
-        const data = {
-            'items': this.state.pick
-        }
+    updateStatus = (key, data) => {
+      const items = this.state.pick
+      items[key] = data;
+      this.setState({
+        items
+      })
+    }
+
+    handleDelete = (e, key, barcode) =>{
+        const data = this.state.pick
         this.setState((prevState) => ({
           pick: prevState.pick.filter((_, i) => i != key)
-        }), () => Updates.writeToFile(dataLocation, data));
+        }), () => 
+        this.order()
+      );
     }
 
     clearPicks = () => {
         this.setState({
-            pick : {}
-        }, () => {
-            Updates.writeToFile(dataLocation, this.state.picks) 
+            pick : ''
         })
+    }
+
+    getPagingSlips = async (e,day) => {
+      const search = await ContentSearch.pagingSlips(day)
+      this.setState(prevState => ({
+          pick: [...prevState.pick, ...search]
+      }), () => {
+          this.order()
+      })
+    }
+
+    addSlips = slip => {
+      let string = this.state.searchObject
+      let slips = Object.keys(slip).map(item => {
+          return slip[item]
+      });
+      let set = slips.join(',')
+      let update = {...string, 'barcode' : set}
+      this.setState({
+        searchObject: update
+      }, () => {
+        this.getRecords()
+      })
+    }
+
+    getRecords = async () => {
+      const data = this.state.pick
+      const search = await ContentSearch.recordData(queryString.stringify(this.state.searchObject))
+      this.setState(prevState => ({
+        pick: [...prevState.pick, ...search]
+      }), () => {
+        this.order()
+      })
+    }
+
+    sort = (e) => {
+      console.log(e.target.value)
+      if(e.target.value === 'reset') { 
+        this.order() 
+      } else {
+       const list = this.state.pick
+       const item = _.orderBy(list, [e.target.value], ['asc'])
+       this.setState({pick: item})
+      }
+    }
+
+    order = () => {
+      const list = this.state.pick
+      const item = _.orderBy(list,
+        ['shelf.row', 'shelf.ladder', 'shelf.shelf_number'],
+        ['asc', 'asc', 'asc']);
+      this.setState({ pick: item, count: item.length})
+    }
+
+
+
+    componentDidUpdate = () => {
+      Updates.writeToFile(dataLocation, this.state.pick)
     }
 
     render(){
@@ -48,7 +124,12 @@ export default class PagingDisplay extends Component {
                 updateStatus={this.updateStatus}
                 order={this.order}
                 clearPicks={this.clearPicks}
-                reOrder={this.orderBy}
+                reOrder={this.sort}
+                getPagingSlips={this.getPagingSlips}
+                addSlips={this.addSlips}
+                count={this.state.count}
+                morningCount={this.state.morningCount}
+                eveningCount={this.state.eveningCount}
               />
             </div>
           </div>
@@ -88,42 +169,49 @@ class Slips extends Component {
   
     renderDisplay = (key) => {
       const data = this.props.data[key]
-      if(data){
-            return(
-              <SlipsData
-                data={data}
-                key={key}
-                index={key}
-                removeThis={this.props.handleDelete}
-                updateStatus={this.props.updateStatus}
-                />
-              )
-    } else {
-        return(
-          <tr key={key}>
-            <td></td>
-          </tr>
+      return(
+          <SlipsData
+              data={data}
+              key={key}
+              index={key}
+              handleDelete={this.props.handleDelete}
+              updateStatus={this.props.updateStatus}
+          />
         )
-    }
     }
   
   
     render(){
       return(
         <div>
+          <div className="row">
+            <div className="col-md-3 bg-light form-wrapper">
+            <br />
+              <RequestForm
+                addItems={this.props.addSlips}
+                getPagingSlips={this.props.getPagingSlips}
+              />
+            </div>
+        </div>
         <div className="row">
-          <div className="col-md-10 form-wrapper">
+          <div className="col-md-9 content-wrapper">
           <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <SlipDisplayOptions
               results={this.props.data}
               clearPicks={this.props.clearPicks}
               print={this.print}
-              reOrder={this.props.reOrder}
+              handleChange={this.props.reOrder}
+              getPagingSlips={this.props.getPagingSlips}
+              count={this.props.count}
+              morningCount={this.props.morningCount}
+              eveningCount={this.props.eveningCount}
             />
           </nav>
           <div className="slips-display">
             {
-              this.props.data ? Object.keys(this.props.data).map(this.renderDisplay) : 'Nothing to pull.  Add some items in Paging > Search'
+              this.props.data 
+                ? Object.keys(this.props.data).map(this.renderDisplay) 
+                : 'Nothing to pull.  Add some items in Paging > Search'
             }
           </div>
           </div>
@@ -137,14 +225,13 @@ class Slips extends Component {
 class SlipsData extends Component {
 
     updateStatus = (e, key, status) => {
-      const data = this.props.data
-      const update = Object.assign({}, data, {'status': status});
-      this.props.updateStatus(key, update)
+        const values = {
+          ...this.props.data,
+          status: status
+      }
+      this.props.updateStatus(key, values)
     }
-  
-    handleDelete = (e, key, barcode) => {
-      this.props.removeThis(key, barcode)
-    }
+
   
     render(){
       const {data, index} = this.props
@@ -196,7 +283,7 @@ class SlipsData extends Component {
             <button className="btn btn-primary btn option-button" onClick={(e) => this.updateStatus(e, index, 'Off Campus')}>Found</button>
             <button className="btn btn-primary btn option-button" onClick={(e) => this.updateStatus(e, index, 'Missing')}>Missing</button>
             <button className="btn btn-primary btn option-button" onClick={(e) => this.updateStatus(e, index, 'Available')}>Available</button>
-            <button className="btn btn-danger btn option-button" onClick={(e) => this.handleDelete(e, index, data.barcode)}>Remove</button>
+            <button className="btn btn-danger btn option-button" onClick={(e) => this.props.handleDelete(e, index, data.barcode)}>Remove</button>
           </div>
         </div>
       )
@@ -224,10 +311,6 @@ class SlipsData extends Component {
       this.props.clearPicks()
     }
 
-    handleChange(e){
-      this.props.reOrder(e.currentTarget.value)
-    }
-
     render(){
         return(
           <div>
@@ -237,11 +320,14 @@ class SlipsData extends Component {
             : ''
           }
             <nav className="navbar fixed-top navbar-light bg-light justify-content-end">
+                <button className="btn btn-secondary option-button" disabled>Items to be paged ({this.props.count})</button>
+                <button className="btn btn-success option-button" onClick={(e) => this.props.getPagingSlips(e, 'morning')}>Morning Slips ({this.props.morningCount})</button>
+                <button className="btn btn-success option-button" onClick={(e) => this.props.getPagingSlips(e, 'evening')}>Evening Slips ({this.props.eveningCount})</button>
                 <button className="btn btn-info option-button" onClick={() => {if(confirm('This will process all records and send them to the server.  It will also erase the local paging slip file.  Are you sure you want to continue?')) {this.getBarcodes()}}}>Process Data</button>
                 <button className="btn btn-info option-button" onClick={() => this.print()}>Print</button>
                 <button className="btn btn-danger option-button" onClick={() => {if(confirm('This will clear all the records from your display. You will not be able to recover these once they are cleared. Are you sure you want to continue?')) {this.clearLocal()}}}>Clear</button>
                 <div className="col-md-2">
-                <select className="form-control pickDisplaySort" onChange={(e) => this.handleChange(e)}>
+                <select className="form-control pickDisplaySort" onChange={(e) => this.props.handleChange(e)}>
                     <option value="">Sort</option>
                     <option value="reset">Reset Sort</option>
                     <option value="call_number">Call Number</option>
@@ -255,5 +341,42 @@ class SlipsData extends Component {
           </nav>
         </div>
         )
+    }
+}
+
+
+class RequestForm extends Component {
+
+  handleSubmit = (e) => {
+      e.preventDefault();
+      const data = {
+          barcodes: this.barcodes.value.trim(),
+      };
+      this.props.addItems(data);
+      this.requestForm.reset();
+  }
+  
+  
+  render(){
+      return(
+        <div>
+        <form ref={(e) => this.requestForm = e} id="barcode_data" name="barcode_data" className="form-horizontal" onSubmit={(e) => this.handleSubmit(e)}>
+        <fieldset>
+            <div className='form-group'>
+                <label id="bc" className="col-md-8 control-label">Add to paging list</label>
+                <div className="col-lg-10">
+                    <textarea ref={(input) => this.barcodes = input} className="form-control" rows="15" id="barcodes" name="barcodes" required></textarea>
+                    <div className="help-block with-errors"></div>
+                </div>
+            </div>
+        </fieldset>
+        <div className="form-group">
+            <div className="col-lg-10 col-lg-offset-2">
+                <button id="submit" type="submit" className="btn btn-primary">Submit</button>
+            </div>
+        </div>
+        </form>
+        </div>
+      )
     }
 }

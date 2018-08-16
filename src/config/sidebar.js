@@ -41,11 +41,11 @@ export const display = {
         'display': "Paging",
         'icon': 'book-open',
         'sub' : {
-            'pagingSearch' : {
-                'display': "Search",
-                'action': 'pagingSearch',
-                'icon': 'search'
-            },
+            // 'pagingSearch' : {
+            //     'display': "Search",
+            //     'action': 'pagingSearch',
+            //     'icon': 'search'
+            // },
             'pagingDisplay' : {
                 'display': 'Pull List',
                 'action': 'pagingDisplay',

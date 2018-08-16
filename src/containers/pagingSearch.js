@@ -28,11 +28,11 @@ export default class PagingSearch extends Component {
 
     getPagingSlips = async (day) => {
         const search = await ContentSearch.pagingSlips(day)
-        const data = this.state.pick
-        data['items'] = search
-        this.setState({data}, () => 
+        this.setState(prevState => ({
+            pick: [...prevState.pick, ...search]
+        }), () => {
             this.order()
-        )
+        })
     }
 
     addSlips = slip => {
@@ -51,12 +51,12 @@ export default class PagingSearch extends Component {
 
     addPick = (key, update) => {
         const data = this.state.pick
-        data['items'] = update
+        data[`pick${Date.now()}`] = update
         this.setState({
-          update
+            data        
         }, () => {
-            this.order()
-            // this.props.addPaging(this.props.pagingCount + 1)
+            Updates.writeToFile(dataLocation, this.state.pick)
+                // this.props.addPaging(this.props.pagingCount + 1)
         })
       }
 
@@ -67,14 +67,13 @@ export default class PagingSearch extends Component {
     }
 
     order(){
-        const list = this.state.pick['items']
+        const list = this.state.pick
         const item = _.orderBy(list,
           ['shelf.row', 'shelf.ladder', 'shelf.shelf_number'],
           ['asc', 'asc', 'asc']);
-        const data = {
-            'items': item
-        } 
-        this.setState({ pick: data}, () => { Updates.writeToFile(dataLocation, this.state.pick) })
+        this.setState(prevState => ({
+            pick: [...prevState.pick, item]
+        }), () => {Updates.writeToFile(dataLocation, this.state.pick) })
       }
 
     render(){

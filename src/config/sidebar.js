@@ -37,21 +37,9 @@ export const display = {
         'icon': 'chart-bar'
     },
     'paging': {
-        'action': 'paging',
+        'action': 'pagingDisplay',
         'display': "Paging",
         'icon': 'book-open',
-        'sub' : {
-            // 'pagingSearch' : {
-            //     'display': "Search",
-            //     'action': 'pagingSearch',
-            //     'icon': 'search'
-            // },
-            'pagingDisplay' : {
-                'display': 'Pull List',
-                'action': 'pagingDisplay',
-                'icon': 'list-alt'
-            }
-        }
     },
     'returns': {
         'action': 'return',

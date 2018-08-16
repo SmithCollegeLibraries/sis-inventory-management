@@ -1,4 +1,5 @@
-import { collections, managetray, pagingslips, searchaleph, shelfsearchall, statistics } from '../config/endpoints'
+import { collections, managetray, pagingslips, searchaleph, shelfsearchall, statistics, titlesearch, oclcsearch, callnumbersearch } from '../config/endpoints'
+
 
 class ContentSearch {
 
@@ -29,6 +30,24 @@ class ContentSearch {
 
     reports = async (endpoint, query) => {
         let search = await this.search(`${statistics}${endpoint}${query}`)
+        return search
+    }
+
+    ill = async (type, query) => {
+        let search = await this.search(`${titlesearch}?query=${query}`)
+        switch(type){
+            case 'title': 
+                search = await this.search(`${titlesearch}?query=${query}`)
+            break;
+            case 'oclc':
+                search = await this.search(`${oclcsearch}?query=${query}`)
+            break;
+            case 'callnumber':
+                search = await this.search(`${callnumbersearch}?query=${query}`)    
+            break;
+            default:
+            break;    
+        }
         return search
     }
 

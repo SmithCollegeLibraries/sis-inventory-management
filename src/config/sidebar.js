@@ -48,7 +48,7 @@ export const display = {
     },
     'internal': {
         'action': 'internal',
-        'display': 'Internal Request',
+        'display': 'Internal',
         'icon': 'question-circle'
     },
     'ill': {
@@ -59,7 +59,39 @@ export const display = {
     'search': {
         'action': 'search',
         'display': 'Search',
-        'icon': 'search'
+        'icon': 'search',
+        // 'sub' : {
+        //     'singleBarcode' : {
+        //         'display': "Single Barcode",
+        //         'action' : 'search',
+        //         'icon': ''
+        //     }, 
+        //     'traySearch' : {
+        //         'display': "Tray",
+        //         'action': 'search',
+        //         'icon': ''
+        //     },
+        //     'titleSearch' : {
+        //         'display': "Title",
+        //         'action': 'search',
+        //         'icon': ''
+        //     },
+        //     'multiBarcode' : {
+        //         'display' : "MultiBarcode",
+        //         'action': 'search',
+        //         'icon': ''
+        //     }
+        // }
+    },
+    'settings' : {
+        'action': 'welcome',
+        'display': 'Settings',
+        'icon': 'cog'
+    },
+    'history' : {
+        'action' : 'history',
+        'display': 'History',
+        'icon': 'history'
     }
 }
 

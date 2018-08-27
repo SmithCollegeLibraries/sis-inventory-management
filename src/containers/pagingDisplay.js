@@ -2,13 +2,19 @@ import React, { Component } from 'react'
 import Load from '../util/load'
 import ContentSearch from '../util/search'
 import Updates from '../util/updates'
+import Alerts from '../components/alerts'
 import queryString from 'query-string'
 import _ from 'lodash'
-const electron = window.require('electron');
+import { getFormattedDate } from '../util/date';
+const {remote} = require('electron');
+const {BrowserWindow, dialog, shell} = remote;
 const fs = window.require('fs');
 const path = window.require('path');
 const fileName = 'paging.json';
+const printFileName = 'print.html';
 const dataLocation = path.resolve(__dirname, '..','data', fileName);
+const printLocation = path.resolve(__dirname, '..', 'print', printFileName);
+
 
 export default class PagingDisplay extends Component {
 
@@ -22,14 +28,10 @@ export default class PagingDisplay extends Component {
     }
 
     componentDidMount = async () => {
-        const results = Load.loadFromFile(dataLocation)
-        const morning = await ContentSearch.pagingSlips('morning')
-        const evening = await ContentSearch.pagingSlips('evening')
+        const results = await Load.loadFromFile(dataLocation)
         this.setState({
             pick: results,
-            count: results.length,
-            morningCount: morning.length,
-            eveningCount: evening.length
+            count: results.length || 0,
         })
     }
 
@@ -52,7 +54,8 @@ export default class PagingDisplay extends Component {
 
     clearPicks = () => {
         this.setState({
-            pick : ''
+            pick : {},
+            count: 0
         })
     }
 
@@ -146,7 +149,7 @@ class Slips extends Component {
   
     print = () => {
         let win = new BrowserWindow({width: 1100, height: 600})
-        win.loadURL('file://' + __dirname + '/print/print.html')
+        win.loadURL(`file://${printLocation}`)
         win.webContents.on('did-finish-load', () => {
           // Use default printing options
           win.webContents.print({}, (error, data) => {
@@ -195,6 +198,7 @@ class Slips extends Component {
         </div>
         <div className="row">
           <div className="col-md-9 content-wrapper">
+          <br />
           <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <SlipDisplayOptions
               results={this.props.data}
@@ -211,7 +215,7 @@ class Slips extends Component {
             {
               this.props.data 
                 ? Object.keys(this.props.data).map(this.renderDisplay) 
-                : 'Nothing to pull.  Add some items in Paging > Search'
+                : 'Nothing to pull.'
             }
           </div>
           </div>
@@ -299,6 +303,18 @@ class SlipsData extends Component {
         loading: false
     }
 
+    processBarcodes = async (key) => {
+      const data = this.props.results[key]
+      const values = {
+        status: data.status,
+        timestamp: getFormattedDate()
+      }
+      if(data.tray_id){
+        const results = await Load.processBarcodes(data.tray_id, data.barcode, data)
+      }
+      this.props.clearPicks()
+    }
+
     getBarcodes(){
         Object.keys(this.props.results).map(this.processBarcodes)
     }
@@ -321,8 +337,8 @@ class SlipsData extends Component {
           }
             <nav className="navbar fixed-top navbar-light bg-light justify-content-end">
                 <button className="btn btn-secondary option-button" disabled>Items to be paged ({this.props.count})</button>
-                <button className="btn btn-success option-button" onClick={(e) => this.props.getPagingSlips(e, 'morning')}>Morning Slips ({this.props.morningCount})</button>
-                <button className="btn btn-success option-button" onClick={(e) => this.props.getPagingSlips(e, 'evening')}>Evening Slips ({this.props.eveningCount})</button>
+                <button className="btn btn-success option-button" onClick={(e) => this.props.getPagingSlips(e, 'morning')}>Morning Slips</button>
+                <button className="btn btn-success option-button" onClick={(e) => this.props.getPagingSlips(e, 'evening')}>Evening Slips</button>
                 <button className="btn btn-info option-button" onClick={() => {if(confirm('This will process all records and send them to the server.  It will also erase the local paging slip file.  Are you sure you want to continue?')) {this.getBarcodes()}}}>Process Data</button>
                 <button className="btn btn-info option-button" onClick={() => this.print()}>Print</button>
                 <button className="btn btn-danger option-button" onClick={() => {if(confirm('This will clear all the records from your display. You will not be able to recover these once they are cleared. Are you sure you want to continue?')) {this.clearLocal()}}}>Clear</button>

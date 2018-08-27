@@ -1,8 +1,8 @@
 {
-  "name": "inventory_management",
-  "productName": "inventory_management",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "name": "SIS_Inventory_System",
+  "productName": "Smith College Libraries Inventory System",
+  "version": "3.0.0",
+  "description": "High-density storage management tool for quickly loading and retrieving tray and shelf information",
   "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
@@ -11,9 +11,9 @@
     "publish": "electron-forge publish",
     "lint": "eslint --cache --color --ext .jsx,.js src"
   },
-  "keywords": [],
-  "author": "roconnell",
-  "license": "MIT",
+  "keywords": ["High-density storage", "inventory management"],
+  "author": "Rob O'Connell - Smith College Libraries",
+  "license": "GNU General Public License v2.0",
   "config": {
     "forge": {
       "make_targets": {
@@ -56,11 +56,15 @@
     "electron-devtools-installer": "^2.1.0",
     "electron-squirrel-startup": "^1.0.0",
     "lodash": "^4.17.10",
+    "moment": "^2.22.2",
     "query-string": "^6.1.0",
     "react": "^15.4.1",
     "react-bootstrap": "^0.32.1",
+    "react-datepicker": "^1.6.0",
     "react-dom": "^15.4.1",
-    "react-hot-loader": "^3.0.0-beta.6"
+    "react-hot-loader": "^3.0.0-beta.6",
+    "react-loading": "^2.0.3",
+    "react-s-alert": "^1.4.1"
   },
   "devDependencies": {
     "babel-plugin-transform-async-to-generator": "^6.24.1",

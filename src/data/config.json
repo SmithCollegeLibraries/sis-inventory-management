@@ -1,0 +1,10 @@
+{
+    "name":"",
+    "serverToken":"",
+    "serverAddress":"https://libtools.smith.edu/demo/sis/web/",
+    "trayBarcodeLength":8,
+    "shelfBarcodeLength":7,
+    "shelfPositions":12,
+    "welcomeScreen":"true",
+    "startScreen":"tray"
+}

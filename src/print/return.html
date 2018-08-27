@@ -18,7 +18,9 @@ const render = () => {
   const App = require('./printtemplate/').default;
   ReactDOM.render(
     <AppContainer>
-      <App />
+      <App
+        slips={'returns'}
+      />
     </AppContainer>,
     document.getElementById('App'));
 }

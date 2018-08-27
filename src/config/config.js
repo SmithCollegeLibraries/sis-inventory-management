@@ -1,6 +1,7 @@
 export const settings = {
     'server': 'https://libtools.smith.edu/sis/web/',
     'barcodeLength' : 8,
+    'start': 'trays'
 }
 
 

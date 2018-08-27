@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Welcome from '../containers/welcome'
 import Tray from '../containers/trays'
 import Shelf from '../containers/shelf'
 import ILL from '../containers/ill'
@@ -10,9 +11,11 @@ import TrayManagement from '../containers/trayManagement'
 import ShelfManagement from '../containers/shelfManagement'
 import CollectionManagement from '../containers/collectionManagement'
 import PagingDisplay from '../containers/pagingDisplay'
+import History from '../containers/history'
 
 class DisplayComponents extends Component {
     components = {
+        welcome: Welcome,
         tray: Tray,
         shelf: Shelf,
         ill: ILL,
@@ -23,11 +26,18 @@ class DisplayComponents extends Component {
         trayManagement: TrayManagement,
         shelfManagement: ShelfManagement,
         collectionManagement: CollectionManagement,
-        pagingDisplay: PagingDisplay
+        pagingDisplay: PagingDisplay,
+        history: History
     };
     render() {
-       const TagName = this.components[this.props.tag || 'tray'];
-       return <TagName />
+       const TagName = this.components[this.props.tag || 'welcome'];
+       return <TagName 
+                    display={this.props.tag}
+                    updateDisplay={this.props.updateDisplay}
+                    settings={this.props.settings}
+                    collections={this.props.collections}
+                    updateCollections={this.props.updateCollections}
+                />
     }
 }
 export default DisplayComponents;

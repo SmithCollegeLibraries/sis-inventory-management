@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
+import Load from '../util/load'
 import ContentSearch from '../util/search'
+import Alerts from '../components/alerts'
 import {getFormattedDate} from '../util/date'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -9,23 +11,19 @@ export default class TrayManagement extends Component {
         loading: false,
         searchResults: {},
         collections: {},
-        collapse: false
-    }
-
-    componentDidMount(){
-        this.collections()
+        collapse: false,
     }
     
     handleTraySearch = async (searchValue) => {
-        const search = await ContentSearch.traymanagement(searchValue)
-        this.setState({
-            searchResults: search,
+        this.setState({ 
+          loading: true
         })
-    }
-
-    collections = async () => {
-        const search = await ContentSearch.collections()
-        this.setState({ collections: search })
+        const search = await ContentSearch.traymanagement(searchValue)
+        if(search && !search.length){ Alerts.info('No search results found')}
+        this.setState({ 
+          searchResults: search ? search : {} , 
+          loading: false
+        })
     }
 
     handleUpdate = (key, data) => {
@@ -33,55 +31,29 @@ export default class TrayManagement extends Component {
         results[key] = data
         this.setState({ results })
     }
-    
-    //   handleUpdate(key, updated){
-    //     const updatedValues = this.state.searchResults;
-    //     updatedValues[key] = updated;
-    //     fetch(managetrayupdate + 'update/' + updated.id, {
-    //         method: 'put',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json',
-    //             'Access-Control-Allow-Origin': '*'
-    //         },
-    //         body: JSON.stringify(updated)
-    //     })
-    //     this.setState({
-    //         updatedValues
-    //     })
-    //   }
+
+    updateItem = (e, key, id, index) => {
+      e.preventDefault()
+      const results = Load.updateTrays(this.state.searchResults[index], this.state.searchResults[index].id)
+      Alerts.success('Tray updated successfully')
+    }
     
     handleDelete = (key, id, index) =>{
         this.setState((prevState) => ({
           searchResults: prevState.searchResults.filter((_, i) => i != index)
-        }));
-    }
-
-    updateItem = (key, id, index) => {
-        console.log(this.state.searchResults[index])
+        }), async () => {
+          const results = await Load.deleteTrays(this.state.searchResults, id)
+          Alerts.success('Tray item was deleted succesfully')
+      })
     }
 
     handleCollapse = () => {
         this.setState(prevState => ({
             collapse: !prevState.collapse
         }));
-    }
-    
-    //   deleteItem(id){
-    //     const updated = this.state.searchResults;
-    //     fetch(managetrayupdate + 'delete/' + id, {
-    //         method: 'delete',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json',
-    //             'Access-Control-Allow-Origin': '*'
-    //         },
-    //         body: JSON.stringify(updated)
-    //     })
-    //   }
+    }  
     
       render(){
-          console.log(this.state.searchResults)
         return(
           <div>
             <div className="row">
@@ -102,7 +74,7 @@ export default class TrayManagement extends Component {
               <div className={!this.state.collapse ? "col-md-8 content-wrapper" : "col-md-10 content-wrapper"}>
                 <TrayEdit
                   data={this.state.searchResults}
-                  collections={this.state.collections}
+                  collections={this.props.collections}
                   handleUpdate={this.handleUpdate}
                   deleteItem={this.handleDelete}
                   updateItem={this.updateItem}
@@ -149,12 +121,12 @@ class TrayEdit extends Component {
           this.props.handleUpdate(index, values)
       }
     
-      deleteItem = (key, id, index) => {
+      deleteItem = (e, key, id, index) => {
         this.props.deleteItem(key, id, index)
       }
 
-      updateItem = (key, id, index) => {
-          this.props.updateItem(key, id, index)
+      updateItem = (e, key, id, index) => {
+          this.props.updateItem(e, key, id, index)
       }
     
       renderDisplay = (key, index) => {
@@ -187,11 +159,11 @@ class TrayEdit extends Component {
               </select>
           </td>
           <td>
-            <button className="btn btn-danger" onClick={() => {if(confirm('Delete this item?')) {this.deleteItem(key, data.id, index)}}}>Delete</button>
-          </td>
+            <button className="btn btn-primary" onClick={(e) =>this.updateItem(e, key, data.id, index)}>Update</button>
+          </td>  
           <td>
-            <button className="btn btn-primary" onClick={() =>this.updateItem(key, data.id, index)}>Update</button>
-          </td>    
+            <button className="btn btn-danger" onClick={(e) => {if(confirm('Delete this item?')) {this.deleteItem(e, key, data.id, index)}}}>Delete</button>
+          </td>  
         </tr>
       )
       }
@@ -205,8 +177,8 @@ class TrayEdit extends Component {
                 <th>Tray Barcode</th>
                 <th>Barcodes</th>
                 <th>Collection</th>
-                <th>Option</th>
                 <th>Update</th>
+                <th>Option</th>
               </tr>
             </thead>
             <tbody>

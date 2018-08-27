@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import { getFormattedDate } from '../util/date'
+import Process from '../components/process'
 import Updates from '../util/updates'
 import Load from '../util/load'
 import Messages from '../util/messages'
+import Alerts from '../components/alerts'
 const electron = window.require('electron');
 const fs = window.require('fs');
 const path = window.require('path');
@@ -14,7 +16,7 @@ export default class Shelf extends Component {
     state = {
         validate: false,
         shelfBarcodes: {},
-        loading: false
+        loading: false,
     }
 
     componentDidMount = () => {
@@ -49,18 +51,44 @@ export default class Shelf extends Component {
         const items = Object.keys(this.state.shelfBarcodes)
         let filter = items.filter(item => item !== key)
         this.setState({shelfBarcodes: filter}, () => {Updates.writeToFile(dataLocation, this.state.shelfBarcodes)})
+        Alerts.success('Item deleted successfully')
     }
+
+    processData = async (data) => {
+        const values = {
+            boxbarcode: data.boxbarcode,
+            shelfbarcode: data.shelfbarcode,
+            added: data.timestamp,
+            shelf_depth: data.shelf_depth,
+            shelf_position: data.shelf_position
+        }
+
+        const results = await Load.insertShelf(values) 
+        if(results === 'true'){
+            Alerts.success('All items have been processed successfully')
+            this.setState({
+                shelfBarcodes: {}
+            }, () => { Updates.writeToFile(dataLocation, this.state.shelfBarcodes)})
+
+        } else {
+            results.message
+                ? Alerts.error(results)
+                : Alerts.duplicate(results[0].boxbarcode, results[0].barcode)
+        }
+    }  
   
 
       render(){
         return(
           <div>
+            {this.state.message ? Messages.response(this.state.messageText, this.state.messageType) : ''}
             <div className="row">
               <div className="col-md-3 bg-light form-wrapper">
                 <ShelfForm
                   addTray={this.addTrayToShelf}
-                  data={this.state.shelfBarcodes}
+                  data={this.state.shelfBarcodes} 
                   process={this.processData}
+                  settings={this.props.settings}
                 />
               </div>
             </div>
@@ -75,6 +103,7 @@ export default class Shelf extends Component {
                   data={this.state.shelfBarcodes}
                   updateShelf={this.updateShelf}
                   handleDelete={this.handleDelete}
+                  settings={this.props.settings}
                 />
               </div>
             </div>
@@ -137,11 +166,11 @@ export default class Shelf extends Component {
         
             switch(fieldName) {
                 case 'shelfbarcode':
-                    shelfValid = value.length === 7;
+                    shelfValid = value.length === this.props.settings.shelfBarcodeLength;
                     fieldValidationErrors.shelf = shelfValid ? '': ' isn\'t the right length';
                 break;
                 case 'boxbarcode':
-                    trayValid = value.length === 8;
+                    trayValid = value.length === this.props.settings.trayBarcodeLength;
                     fieldValidationErrors.tray = trayValid ? '': ' isn\'t the right length';
                 break;
                 default:
@@ -191,10 +220,10 @@ export default class Shelf extends Component {
                                   <div className="col-lg-10 col-lg-offset-2">
                                       <button id="submit" type="submit" className="btn btn-primary" disabled={!this.state.formValid}>Submit</button>
                                       <br />
-                                      {/* <Process
+                                      <Process
                                         data={this.props.data}
                                         process={this.props.process}
-                                      /> */}
+                                      />
                                   </div>
                               </div>
                           </fieldset>
@@ -236,18 +265,9 @@ export default class Shelf extends Component {
                     <td>
                         <select className="form-control" value={shelf.shelf_position} onChange={(e) => this.handleChange(e, key)} name="shelf_position">
                             <option value="">Position</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
+                            {[...Array(this.props.settings.shelfPositions)].map((x, i) =>
+                                <option key={i} value={i + 1}>{i + 1}</option>
+                            )}
                         </select>
                     </td>
                     <td><input className="form-control" id="disabledInput" type="text" value={shelf.timestamp} disabled /></td>

@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import { FormControl, Button } from 'react-bootstrap'
+import Process from '../components/process'
 import ContentSearch from '../util/search'
 import Updates from '../util/updates'
 import Load from '../util/load'
 import Messages from '../util/messages'
+import Alerts from '../components/alerts'
 import { getFormattedDate } from '../util/date'
 const electron = window.require('electron');
 const fs = window.require('fs');
@@ -14,11 +16,13 @@ const dataLocation = path.resolve(__dirname, '..','data', fileName);
 export default class Trays extends Component {
 
     state = {
-        collections: {},
         validate: false,
         barcode: {},
         verifiedBarcodes: {},
-        loading: false
+        loading: false, 
+        message: false,
+        messageType: 'success',
+        messageText: ''
     }
 
     componentDidMount = () => {
@@ -26,7 +30,6 @@ export default class Trays extends Component {
          this.setState({
             verifiedBarcodes: results
         })
-        this.collections()
     }
 
     addBarcode = (data) => {
@@ -36,6 +39,7 @@ export default class Trays extends Component {
         }, () => {
           console.log(this.state.barcode)
         })
+        Alerts.info('Please validate barcodes')
       }
 
       verifiedBarcodes = (item, status) => {
@@ -63,21 +67,45 @@ export default class Trays extends Component {
         })
       }  
 
-    collections = async () => {
-        const search = await ContentSearch.collections()
-        this.setState({ collections: search })
-    }
+
     
     handleDelete = (key) => {
         const items = Object.keys(this.state.verifiedBarcodes)
         let filter = items.filter(item => item !== key)
-        this.setState({verifiedBarcodes: filter}, () => {Updates.writeToFile(dataLocation, this.state.verifiedBarcodes)})
+        this.setState({
+            verifiedBarcodes: filter
+        }, () => {
+            Updates.writeToFile(dataLocation, this.state.verifiedBarcodes)
+        })
+        Alerts.success('Item deleted successfully')
     }
+
+    processData = async (data) => {
+        const values = {
+            boxbarcode: data.boxbarcode.trim(),
+            barcodes: data.barcodes.trim(),
+            location: data.location,
+            initials: data.initials,
+            added: data.timestamp
+        }
+
+        const results = await Load.insertTrays(values) 
+        if(results === 'true'){
+            Alerts.success('All items have been processed successfully')
+            this.setState({
+                verifiedBarcodes: {}
+            }, () => { Updates.writeToFile(dataLocation, this.state.verifiedBarcodes)})
+
+        } else {
+            results.message
+                ? Alerts.error(results)
+                : Alerts.duplicate(results[0].boxbarcode, results[0].barcode)
+        }
+    }    
 
     render(){
         return(
             <div>
-                {this.state.validate ? Messages.success('Please validate the barcodes') : ''}
                 <div className="row">
                     <div className="col-md-3 bg-light form-wrapper">
                         <TrayForm 
@@ -85,24 +113,21 @@ export default class Trays extends Component {
                             addBarcode={this.addBarcode}
                             barcode={this.state.barcode}
                             verifiedBarcodes={this.verifiedBarcodes}
-                            collections={this.state.collections}
+                            collections={this.props.collections}
                             data={this.state.verifiedBarcodes}
                             process={this.processData}
+                            settings={this.props.settings}
                         />
                      </div>
                 </div>
                 <div className="row">
-                     {this.state.loading 
-                        ?
-                        <div className="loading">Loading&#8230;</div>
-                        : ''
-                     }
                     <div className="col-md-8 content-wrapper">
                          <TrayDisplay
                             data={this.state.verifiedBarcodes}
                             updateBarcode={this.updateBarcode}
-                            collections={this.state.collections}
+                            collections={this.props.collections}
                             handleDelete={this.handleDelete}
+                            loading={this.state.loading}
                         />
                     </div>
                 </div>
@@ -178,7 +203,7 @@ class TrayForm extends Component {
     
         switch(fieldName) {
             case 'boxbarcode':
-                trayValid = value.length === 8;
+                trayValid = value.length === this.props.settings.trayBarcodeLength;
                 fieldValidationErrors.tray = trayValid ? '': ' is too long';
             break;
             default:
@@ -252,31 +277,6 @@ class TrayForm extends Component {
                 </fieldset>
             </form>
         )
-    }
-}
-
-
-class Process extends Component {
-  
-    processData = (key) => {
-        const items = this.props.data[key];
-        this.props.process(items);
-    }
-  
-    getData = () => {
-        {
-            Object
-                .keys(this.props.data)
-                .map(this.processData)
-        }
-    }
-  
-    render(){
-      return(
-        <button id="process" className="btn btn-success process-data" onClick={() => this.getData()}>
-          Process requests
-        </button>
-      )
     }
 }
 

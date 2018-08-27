@@ -2,13 +2,18 @@ import React, { Component } from 'react'
 import Load from '../util/load'
 import ContentSearch from '../util/search'
 import Updates from '../util/updates'
+import Alerts from '../components/alerts'
+import { getFormattedDate } from '../util/date';
 import queryString from 'query-string'
+import electron, { remote } from 'electron'
 import _ from 'lodash'
-const electron = window.require('electron');
+const {BrowserWindow, dialog, shell} = remote;
 const fs = window.require('fs');
 const path = window.require('path');
 const fileName = 'return.json';
+const printFileName = 'return.html';
 const dataLocation = path.resolve(__dirname, '..','data', fileName);
+const printLocation = path.resolve(__dirname, '..', 'print', printFileName);
 
 export default class Return extends Component {
 
@@ -23,7 +28,7 @@ export default class Return extends Component {
         const results = Load.loadFromFile(dataLocation)
         this.setState({
             return: results,
-            count: results.length,
+            count: results.length || 0,
         })
     }
 
@@ -46,7 +51,8 @@ export default class Return extends Component {
 
     clearPicks = () => {
         this.setState({
-            return : ''
+            return : {},
+            count: 0
         })
     }
 
@@ -128,7 +134,7 @@ class Slips extends Component {
   
     print = () => {
         let win = new BrowserWindow({width: 1100, height: 600})
-        win.loadURL('file://' + __dirname + '/print/print.html')
+        win.loadURL(`file://${printLocation}`)
         win.webContents.on('did-finish-load', () => {
           // Use default printing options
           win.webContents.print({}, (error, data) => {
@@ -275,6 +281,19 @@ class SlipsData extends Component {
         showBarcodes: false,
         loading: false
     }
+
+    processBarcodes = async (key) => {
+        const data = this.props.results[key]
+        const values = {
+          status: data.status,
+          timestamp: getFormattedDate()
+        }
+        if(data.tray_id){
+          const results = await Load.processBarcodes(data.tray_id, data.barcode, data)         
+        }
+        this.props.clearPicks()
+        
+      }
 
     getBarcodes(){
         Object.keys(this.props.results).map(this.processBarcodes)

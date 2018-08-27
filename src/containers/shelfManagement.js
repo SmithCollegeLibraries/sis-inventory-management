@@ -1,29 +1,33 @@
 import React, { Component } from 'react'
 import ContentSearch from '../util/search'
+import Load from '../util/load'
+import Alerts from '../components/alerts'
 import {getFormattedDate} from '../util/date'
 import Messages from '../util/messages'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import ReactLoading from 'react-loading';
 
 
 export default class ShelfManagement extends Component {
     state = {
         loading: false,
         searchResults: {},
-        collections: {},
+        collections: this.props.collections,
         collapse: false,
         updated: false
     }
 
-    handleShelfSearch = async (searchValue) => {
-        const search = await ContentSearch.shelfmanagement(searchValue)
-        this.setState({
-            searchResults: search,
-        })
-    }
 
-    collections = async () => {
-        const search = await ContentSearch.collections()
-        this.setState({ collections: search })
+    handleShelfSearch = async (searchValue) => {
+        this.setState({
+          loading: true
+        })
+        const search = await ContentSearch.shelfmanagement(searchValue)
+        if(search && !search.length){ Alerts.info('No search results found')}
+        this.setState({
+            searchResults: search ? search : {},
+            loading: false
+        })
     }
 
     handleCollapse = () => {
@@ -38,19 +42,21 @@ export default class ShelfManagement extends Component {
         this.setState({ results })
     }
 
-    updateItem = (key, id, index) => {
-        console.log(this.state.searchResults[index])
-        this.setState({ updated: true })
-        setTimeout(() => {
-            this.setState({updated: false});
-        }, 2000)
+    updateItem = (e, key, id, index) => {
+      e.preventDefault()
+      const results = Load.updateShelf(this.state.searchResults[index], this.state.searchResults[index].id)
+      Alerts.success('Shelf updated successfully')
+    }
+    
+    handleDelete = (e, key, id, index) =>{
+        this.setState((prevState) => ({
+          searchResults: prevState.searchResults.filter((_, i) => i != index)
+        }), async () => {
+          const results = await Load.deleteShelf(this.state.searchResults, id)
+          Alerts.success('Tray item was deleted succesfully')
+      })
     }
 
-    updatedMessage = (item) => {
-        return Messages.success(`${item.id} was updated`)
-    }
-    
-    
 
     render(){
         return(
@@ -76,6 +82,7 @@ export default class ShelfManagement extends Component {
                   collections={this.state.collections}
                   handleUpdate={this.handleUpdate}
                   updateItem={this.updateItem}
+                  handleDelete={this.handleDelete}
                 />
               </div>
             </div>
@@ -164,7 +171,10 @@ class ShelfAllEdit extends Component {
               </select>
           </td>
           <td>
-            <button className="btn btn-primary" onClick={() =>this.updateItem(key, data.id, index)}>Update</button>
+            <button className="btn btn-primary" onClick={(e) => this.props.updateItem(e, key, data.id, index)}>Update</button>
+          </td>  
+          <td>
+            <button className="btn btn-danger" onClick={(e) => {if(confirm('Delete this item?')) {this.props.handleDelete(e, key, data.id, index)}}}>Delete</button>
           </td>  
         </tr>
       )
@@ -182,7 +192,8 @@ class ShelfAllEdit extends Component {
               <th>Shelf Barcode</th>
               <th>Shelf Depth</th>
               <th>Shelf Position</th>
-              <th></th>
+              <th>Update</th>
+              <th>Option</th>
             </tr>
           </thead>
           <tbody>

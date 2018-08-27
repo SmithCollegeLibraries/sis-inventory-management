@@ -149,7 +149,7 @@ class DailyDisplay extends Component {
     render(){
         const { data } = this.props || {}
         return(
-            <span>
+            <div className="container">
                 <h1 className="display-4">Daily report for {data.today}</h1>
                 <table className="table table-hover tray-table">
                     <thead className="thead-light">
@@ -194,7 +194,7 @@ class DailyDisplay extends Component {
                             }
                       </tbody>     
                 </table>   
-          </span>
+          </div>
         )
     }
 }

@@ -2,6 +2,19 @@ import React, { Component } from 'react'
 
 class Messages extends Component {
 
+    response = (message, type) => {
+        switch(type){
+            case 'success':
+                return this.success(message)
+            break;
+            case 'error':
+                return this.error(message)
+            break;
+            default:
+            break;        
+        }
+    }
+
     success = (message) => {
             return(
                 <div className="alert alert-success primary-alert" role="alert">
@@ -10,13 +23,12 @@ class Messages extends Component {
             )
         }
 
-     error = (message, data) => {
-        <div className="alert alert-danger primary-alert alert-dismissible fade show" role="alert">
-            <button type="button" onClick={() => props.closeAlert()} className="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            {this.state.alertMessage} {this.state.alertData}
-        </div>
+     error = (message) => {
+        return (
+            <div className="alert alert-danger primary-alert fade show" role="alert">
+                {message}
+            </div>
+        )
      }   
 }
 

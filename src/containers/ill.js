@@ -105,7 +105,8 @@ export default class ILL extends Component {
 
   handleClear = () => {
     this.setState({
-      searchResults: []
+      searchResults: {},
+      requests: {}
     })
   }
 

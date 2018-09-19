@@ -1,19 +1,24 @@
 {
   "name": "SIS_Inventory_System",
   "productName": "Smith College Libraries Inventory System",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "High-density storage management tool for quickly loading and retrieving tray and shelf information",
   "main": "src/index.js",
+  "repository": "https://github.com/SmithCollegeLibraries/sis-inventory-management.git",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --cache --color --ext .jsx,.js src"
+    "lint": "eslint --cache --color --ext .jsx,.js src",
+    "pack:win": "rm -rf build dist && electron-packager . yeti-desktop --asar --prune --platform=win32 --arch=x64 --version=0.33.0 --icon=src/images/favicon.ico --out=build"
   },
-  "keywords": ["High-density storage", "inventory management"],
+  "keywords": [
+    "High-density storage",
+    "inventory management"
+  ],
   "author": "Rob O'Connell - Smith College Libraries",
-  "license": "GNU General Public License v2.0",
+  "license": "GPL-2.0-or-later",
   "config": {
     "forge": {
       "make_targets": {
@@ -37,8 +42,8 @@
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},
       "github_repository": {
-        "owner": "",
-        "name": ""
+        "owner": "SmithCollegeLibraries",
+        "name": "sis-inventory-management"
       },
       "windowsStoreConfig": {
         "packageName": "",
@@ -54,7 +59,10 @@
     "convert-excel-to-json": "^1.4.0",
     "electron-compile": "^6.4.3",
     "electron-devtools-installer": "^2.1.0",
+    "electron-osx-sign": "^0.4.10",
     "electron-squirrel-startup": "^1.0.0",
+    "electron-updater": "^3.1.1",
+    "global": "^4.3.2",
     "lodash": "^4.17.10",
     "moment": "^2.22.2",
     "query-string": "^6.1.0",
@@ -64,7 +72,8 @@
     "react-dom": "^15.4.1",
     "react-hot-loader": "^3.0.0-beta.6",
     "react-loading": "^2.0.3",
-    "react-s-alert": "^1.4.1"
+    "react-s-alert": "^1.4.1",
+    "update-electron-app": "^1.3.0"
   },
   "devDependencies": {
     "babel-plugin-transform-async-to-generator": "^6.24.1",

@@ -58,7 +58,7 @@ export default class TrayManagement extends Component {
           <div>
             <div className="row">
               <div className={!this.state.collapse ? "col-md-3 bg-light form-wrapper" : "col-md-1 bg-light form-wrapper"}>
-                <a href="#" className="d-flex justify-content-end expand" onClick={() => this.handleCollapse()}>{!this.state.collapse ? <FontAwesomeIcon icon="minus-square" /> : <FontAwesomeIcon icon="plus-square" />}</a>
+                <a href="#" className="d-flex justify-content-end expand" onClick={() => this.handleCollapse()}>{!this.state.collapse ? <FontAwesomeIcon style={{fontSize: '32px'}} icon="minus-square" /> : <FontAwesomeIcon style={{fontSize: '32px'}}  icon="plus-square" />}</a>
                 <TraySearch
                   handleTraySearch={this.handleTraySearch}
                 />
@@ -133,21 +133,23 @@ class TrayEdit extends Component {
         const data = this.props.data[key]
         const collections = this.props.collections
         return(
-        <tr key={key}>
-          <td>
-            <input className="form-control" disabled value={data.id}
-                name="id" placeholder="ID"
-                onChange={(e) => this.handleChange(e, key, index)}/>
-          </td>
-          <td><input className="form-control" value={data.boxbarcode}
+          <div className="card" key={key}>
+          <div className="card-body">
+          <dl className="row" key={key}>
+            <dt className="col-sm-3">Tray Barcode</dt>
+            <dd className="col-sm-9">
+            <input className="form-control" value={data.boxbarcode}
                 name="boxbarcode" placeholder="Box Barcode"
                 onChange={(e) => this.handleChange(e, key, index)}/>
-          </td>
-          <td><input className="form-control" value={data.barcode}
+            </dd>
+            <dt className="col-sm-3">Barcodes</dt>
+            <dd className="col-sm-9">
+            <input className="form-control" value={data.barcode}
                 name="barcode" placeholder="Barcode"
                 onChange={(e) => this.handleChange(e, key, index)}/>
-          </td>
-          <td>
+            </dd>
+            <dt className="col-sm-3">Collection</dt>
+            <dd className="col-sm-9">
               <select className="form-control" value={data.stream} onChange={(e) => this.handleChange(e, key, index)} name="stream">
               {
                 Object
@@ -155,40 +157,39 @@ class TrayEdit extends Component {
                 .map(function(items, key) {
                   return <option key={key} value={collections[items].name}>{collections[items].name}</option>
                 })
-              }
+                }
               </select>
-          </td>
-          <td>
-            <button className="btn btn-primary" onClick={(e) =>this.updateItem(e, key, data.id, index)}>Update</button>
-          </td>  
-          <td>
-            <button className="btn btn-danger" onClick={(e) => {if(confirm('Delete this item?')) {this.deleteItem(e, key, data.id, index)}}}>Delete</button>
-          </td>  
-        </tr>
+             </dd> 
+             <dt className="col-sm-3">Added</dt>
+             <dd className="col-sm-9">
+               <input className="form-control" disabled value={data.added} />
+            </dd>
+            <dt className="col-sm-3">Updated</dt>
+             <dd className="col-sm-9">
+               <input className="form-control" disabled value={data.timestamp} />
+            </dd>
+            <dt className="col-sm-3"></dt>
+            <dd className="col-sm-9 d-flex justify-content-end" style={{marginTop: '20px'}}>
+            <div className="btn-group" role="group" aria-label="Option buttons">
+              <button className="btn btn-primary" style={{marginRight: '10px'}} onClick={(e) =>this.updateItem(e, key, data.id, index)}>Update</button>
+              <button className="btn btn-danger" style={{marginRight: '10px'}} onClick={(e) => {if(confirm('Delete this item?')) {this.deleteItem(e, key, data.id, index)}}}>Delete</button>
+            </div>
+            </dd>
+          </dl>
+          </div>
+          </div>
       )
       }
     
       render(){
         return(
-            <table className="table table-hover tray-table">
-            <thead>
-              <tr>
-                <th>Id</th>
-                <th>Tray Barcode</th>
-                <th>Barcodes</th>
-                <th>Collection</th>
-                <th>Update</th>
-                <th>Option</th>
-              </tr>
-            </thead>
-            <tbody>
+            <div>
             {
               Object
               .keys(this.props.data)
               .map(this.renderDisplay)
             }
-            </tbody>
-          </table>
+          </div>
         )
       }
 }

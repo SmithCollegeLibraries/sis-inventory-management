@@ -71,7 +71,7 @@ export default class Shelf extends Component {
             }, () => { Updates.writeToFile(dataLocation, this.state.shelfBarcodes)})
 
         } else {
-            results.message
+            results && results.message
                 ? Alerts.error(results)
                 : Alerts.duplicate(results[0].boxbarcode, results[0].barcode)
         }
@@ -251,54 +251,59 @@ export default class Shelf extends Component {
         renderShelf = (key) => {
             const shelf = this.props.data[key];
             return(
-                <tr key={key}>
-                    <td><input value={shelf.boxbarcode} className="form-control" name="boxbarcode" placeholder="Box Barcode" onChange={(e) => this.handleChange(e, key)} /></td>
-                    <td><input value={shelf.shelfbarcode} className="form-control" name="shelfbarcode" placeholder="Shelf Barcode" onChange={(e) => this.handleChange(e, key)} /></td>
-                    <td>
-                    <select className="form-control" value={shelf.shelf_depth} onChange={(e) => this.handleChange(e, key)} name="shelf_depth">
-                        <option value="">Depth</option>
-                        <option value="Front">Front</option>
-                        <option value="Middle">Middle</option>
-                        <option value="Rear">Rear</option>
-                    </select>
-                    </td>
-                    <td>
+                <div className="card" key={key}>
+                <div className="card-body">
+                    <dl className="row" key={key}>
+                        <dt className="col-sm-3">Tray Barcode</dt>
+                        <dd className="col-sm-9">
+                            <input value={shelf.boxbarcode} className="form-control" name="boxbarcode" placeholder="Box Barcode" onChange={(e) => this.handleChange(e, key)} />
+                        </dd>
+                        <dt className="col-sm-3">Shelf Barcode</dt>
+                        <dd className="col-sm-9">  
+                            <input value={shelf.shelfbarcode} className="form-control" name="shelfbarcode" placeholder="Shelf Barcode" onChange={(e) => this.handleChange(e, key)} />
+                        </dd>
+                        <dt className="col-sm-3">Shelf Depth</dt>
+                        <dd className="col-sm-9">
+                            <select className="form-control" value={shelf.shelf_depth} onChange={(e) => this.handleChange(e, key)} name="shelf_depth">
+                                <option value="">Depth</option>
+                                <option value="Front">Front</option>
+                                <option value="Middle">Middle</option>
+                                <option value="Rear">Rear</option>
+                            </select>
+                        </dd>
+                        <dt className="col-sm-3">Shelf Position</dt>
+                        <dd className="col-sm-9">
                         <select className="form-control" value={shelf.shelf_position} onChange={(e) => this.handleChange(e, key)} name="shelf_position">
                             <option value="">Position</option>
                             {[...Array(this.props.settings.shelfPositions)].map((x, i) =>
                                 <option key={i} value={i + 1}>{i + 1}</option>
                             )}
                         </select>
-                    </td>
-                    <td><input className="form-control" id="disabledInput" type="text" value={shelf.timestamp} disabled /></td>
-                    <td><button className="btn btn-danger" onClick={() => this.handleDelete(key)}>Delete</button></td>
-                </tr>
+                        </dd>
+                        <dt className="col-sm-3">Added</dt>
+                        <dd className="col-sm-9">
+                            <input className="form-control" id="disabledInput" type="text" value={shelf.timestamp} disabled />
+                        </dd>
+                        <dt className="col-sm-3"></dt>
+                        <dd className="col-sm-9">
+                            <button className="btn btn-danger" onClick={() => this.handleDelete(key)}>Delete</button>
+                        </dd>
+                    </dl>
+                </div>
+             </div>   
             )
         }
     
         render(){
             const data = this.props.data || {}
             return (
-                <table className="table table-hover tray-table">
-                    <thead>
-                    <tr>
-                        <th>Tray</th>
-                        <th>Shelf</th>
-                        <th>Shelf Depth</th>
-                        <th>Shelf Position</th>
-                        <th>Added</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-    
+                <div>
                     {
                         Object
                             .keys(data)
                             .map(this.renderShelf)
                     }
-                    </tbody>
-                </table>
+                </div>
             )
         }
     }

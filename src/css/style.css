@@ -38,10 +38,13 @@
     bottom: 0;
     margin-left: 0px;
     border-right: 1px solid #eee;
-      background-color: #f8f8f8;
+    background-color: #f8f8f8;
     overflow-x: auto;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
   }
+
+
+
   
   .content-wrapper {
     margin-left: auto;

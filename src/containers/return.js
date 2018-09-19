@@ -56,29 +56,13 @@ export default class Return extends Component {
         })
     }
 
-    addSlips = slip => {
-      let string = this.state.searchObject
-      let slips = Object.keys(slip).map(item => {
-          return slip[item]
-      });
-      let set = slips.join(',')
-      let update = {...string, 'barcode' : set}
-      this.setState({
-        searchObject: update
-      }, () => {
-        this.getRecords()
+    handleMarkAll = (e) => {
+      const item  = this.state.return.map((items, index) => {
+          return {...items, 'status': e.target.value}
       })
+      this.setState({return: item}, () => {Updates.writeToFile(dataLocation, this.state.return)})    
     }
 
-    getRecords = async () => {
-      const data = this.state.return
-      const search = await ContentSearch.recordData(queryString.stringify(this.state.searchObject))
-      this.setState(prevState => ({
-        return: [...prevState.return, ...search]
-      }), () => {
-        this.order()
-      })
-    }
 
     sort = (e) => {
       console.log(e.target.value)
@@ -118,6 +102,8 @@ export default class Return extends Component {
                 getPagingSlips={this.getPagingSlips}
                 addSlips={this.addSlips}
                 count={this.state.count}
+                handleMarkAll={this.handleMarkAll}
+                settings={this.props.settings}
               />
             </div>
           </div>
@@ -164,6 +150,7 @@ class Slips extends Component {
               index={key}
               handleDelete={this.props.handleDelete}
               updateStatus={this.props.updateStatus}
+              settings={this.props.settings}
           />
         )
     }
@@ -172,24 +159,15 @@ class Slips extends Component {
     render(){
       return(
         <div>
-          <div className="row">
-            <div className="col-md-3 bg-light form-wrapper">
             <br />
-              <RequestForm
-                addItems={this.props.addSlips}
-                getPagingSlips={this.props.getPagingSlips}
-              />
-            </div>
-        </div>
-        <div className="row">
-          <div className="col-md-9 content-wrapper">
-          <nav className="navbar navbar-expand-lg navbar-light bg-light">
+            <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <SlipDisplayOptions
               results={this.props.data}
               clearPicks={this.props.clearPicks}
               print={this.print}
               handleChange={this.props.reOrder}
               count={this.props.count}
+              handleMarkAll={this.props.handleMarkAll}
             />
           </nav>
           <div className="slips-display">
@@ -199,9 +177,7 @@ class Slips extends Component {
                 : 'Nothing to return.'
             }
           </div>
-          </div>
-        </div>
-        </div>
+        </div>  
       )
     }
   }
@@ -228,6 +204,13 @@ class SlipsData extends Component {
             <dl className="row">
               <dt className="col-sm-3">Status</dt>
               <dd className="col-sm-9"><strong>{data.status}</strong></dd>
+              <dt className="col-sm-3">Height</dt>
+              {data && data.shelf && data.shelf.shelf_depth ? 
+                data.shelf.shelf_number >= this.props.settings.liftHeight
+                    ? <dd className="requires-truck col-sm-9">Requires Lift Truck</dd>
+                    : <dd className="no-truck col-sm-9">Does not require truck</dd>
+                : ''    
+              }
               <dt className="col-sm-3">Barcode</dt>
               <dd className="col-sm-9">{data.barcode}</dd>
               <dt className="col-sm-3">Tray Barcode</dt>
@@ -240,11 +223,6 @@ class SlipsData extends Component {
               <dd className="col-sm-9">{data && data.shelf && data.shelf.shelf_depth ? data.shelf.shelf_position: ''}</dd>
               <dt className="col-sm-3">Collection</dt>
               <dd className="col-sm-9">{data.stream}</dd>
-  
-            </dl>
-            </div>
-            <div className="col">
-            <dl className="row">
               <dt className="col-sm-3">Title</dt>
               <dd className="col-sm-9">{data.title}</dd>
               <dt className="col-sm-3">Call Number</dt>
@@ -253,13 +231,6 @@ class SlipsData extends Component {
               <dd className="col-sm-9">{data.description}</dd>
               <dt className="col-sm-3">Old Location</dt>
               <dd className="col-sm-9">{data.old_location}</dd>
-              <dt className="col-sm-3">Height</dt>
-              {data && data.shelf && data.shelf.shelf_depth ? 
-                data.shelf.shelf_number >= 8
-                    ? <dd className="requires-truck col-sm-9">Requires Lift Truck</dd>
-                    : <dd className="no-truck col-sm-9">Does not require truck</dd>
-                : ''    
-              }
               <dt className="col-sm-3">Last Update</dt>
               <dd className="col-sm-9">{data.timestamp}</dd>
             </dl>
@@ -320,7 +291,7 @@ class SlipsData extends Component {
                 <button className="btn btn-info option-button" onClick={() => {if(confirm('This will process all records and send them to the server.  It will also erase the local paging slip file.  Are you sure you want to continue?')) {this.getBarcodes()}}}>Process Data</button>
                 <button className="btn btn-info option-button" onClick={() => this.print()}>Print</button>
                 <button className="btn btn-danger option-button" onClick={() => {if(confirm('This will clear all the records from your display. You will not be able to recover these once they are cleared. Are you sure you want to continue?')) {this.clearLocal()}}}>Clear</button>
-                <div className="col-md-2">
+                <div className="col-auto">
                 <select className="form-control pickDisplaySort" onChange={(e) => this.props.handleChange(e)}>
                     <option value="">Sort</option>
                     <option value="reset">Reset Sort</option>
@@ -332,45 +303,14 @@ class SlipsData extends Component {
                     <option value="shelf.ladder">Ladder</option>
                 </select>
                 </div>
+                <div className="col-auto">
+                <select className="form-control pickDisplaySort" onChange={(e) => this.props.handleMarkAll(e)}>
+                    <option value="">Mark All</option>
+                    <option value="Available">Available</option>
+                </select>
+                </div>
           </nav>
         </div>
         )
-    }
-}
-
-
-class RequestForm extends Component {
-
-  handleSubmit = (e) => {
-      e.preventDefault();
-      const data = {
-          barcodes: this.barcodes.value.trim(),
-      };
-      this.props.addItems(data);
-      this.requestForm.reset();
-  }
-  
-  
-  render(){
-      return(
-        <div>
-        <form ref={(e) => this.requestForm = e} id="barcode_data" name="barcode_data" className="form-horizontal" onSubmit={(e) => this.handleSubmit(e)}>
-        <fieldset>
-            <div className='form-group'>
-                <label id="bc" className="col-md-8 control-label">Add items to return</label>
-                <div className="col-lg-10">
-                    <textarea ref={(input) => this.barcodes = input} className="form-control" rows="15" id="barcodes" name="barcodes" required></textarea>
-                    <div className="help-block with-errors"></div>
-                </div>
-            </div>
-        </fieldset>
-        <div className="form-group">
-            <div className="col-lg-10 col-lg-offset-2">
-                <button id="submit" type="submit" className="btn btn-primary">Submit</button>
-            </div>
-        </div>
-        </form>
-        </div>
-      )
     }
 }

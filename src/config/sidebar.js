@@ -10,7 +10,7 @@ export const display = {
         'icon': 'stream'
     },
     "manage" : {
-        'action': '',
+        'action': 'manage',
         'display': 'Manage',
         'icon': 'columns',
         'sub' : {
@@ -28,6 +28,11 @@ export const display = {
                 'display': "Collection",
                 'action': 'collectionManagement',
                 'icon': 'edit'
+            },
+            'trayShelfManagement' : {
+                'display': "Tray/Shelf",
+                'action': "trayShelfManagement",
+                'icon': 'edit'
             }
         }
     },
@@ -37,14 +42,38 @@ export const display = {
         'icon': 'chart-bar'
     },
     'paging': {
-        'action': 'pagingDisplay',
+        'action': 'paging',
         'display': "Paging",
         'icon': 'book-open',
+        'sub' : {
+            'addPaging' : {
+                'display': 'Add',
+                'action' : 'addPaging',
+                'icon' : 'check-circle'
+            },
+            'pagingDisplay' : {
+                'display': 'Pick',
+                'action': 'pagingDisplay',
+                'icon': 'list-alt'
+            }
+        }
     },
     'returns': {
         'action': 'return',
         'display': "Return",
-        'icon': 'book'
+        'icon': 'book',
+        'sub' : {
+            'addReturn' : {
+                'display': 'Add',
+                'action' : 'addReturn',
+                'icon' : 'check-circle'
+            },
+            'returnDisplay' : {
+                'display': 'Return',
+                'action': 'return',
+                'icon': 'list-alt'
+            }
+        }
     },
     'internal': {
         'action': 'internal',

@@ -1,4 +1,4 @@
-import { collections, managetray, pagingslips, searchaleph, shelfsearchall, statistics, titlesearch, oclcsearch, callnumbersearch, traysearch, internalrequests, history } from '../config/endpoints'
+import { collections, managetray, pagingslips, searchaleph, shelfsearchall, statistics, titlesearch, oclcsearch, callnumbersearch, traysearch, internalrequests, history, shelfmanagement } from '../config/endpoints'
 import Load from '../util/load'
 import Alerts from '../components/alerts'
 const electron = window.require('electron');
@@ -54,6 +54,11 @@ class ContentSearch {
 
     getInternalRequests = async (completed) => {
         let search = await this.search(`${internalrequests}status?completed=${completed}&access-token=${settings.serverToken}`)
+        return search
+    }
+
+    trayShelfSearch = async (value) => {
+        let search = await this.search(`${shelfmanagement}?query=${value}&access-token=${settings.serverToken}`)
         return search
     }
 

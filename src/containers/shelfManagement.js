@@ -64,7 +64,7 @@ export default class ShelfManagement extends Component {
             {this.state.updated ?  Messages.success(`Item was updated`) : ''}
             <div className="row">
             <div className={!this.state.collapse ? "col-md-3 bg-light form-wrapper" : "col-md-1 bg-light form-wrapper"}>
-                <a href="#" className="d-flex justify-content-end expand" onClick={() => this.handleCollapse()}>{!this.state.collapse ? <FontAwesomeIcon icon="minus-square" /> : <FontAwesomeIcon icon="plus-square" />}</a>
+                <a href="#" className="d-flex justify-content-end expand" onClick={() => this.handleCollapse()}>{!this.state.collapse ? <FontAwesomeIcon style={{fontSize: '32px'}}  icon="minus-square" /> : <FontAwesomeIcon style={{fontSize: '32px'}}  icon="plus-square" />}</a>
                 <ShelfAllSearch
                   handleShelfSearch={this.handleShelfSearch}
                 />
@@ -142,41 +142,61 @@ class ShelfAllEdit extends Component {
         options.push(<option key={i} value={i}>{i}</option>)
       }
       return(
-        <tr key={key}>
-          <td>
-            <input className="form-control" disabled value={data.id}
-                name="id" placeholder="ID"
-                onChange={(e) => this.handleChange(e, key, index)}/>
-          </td>
-          <td><input className="form-control" value={data.boxbarcode}
-                name="boxbarcode" placeholder="Box Barcode"
-                onChange={(e) => this.handleChange(e, key, index)}/>
-          </td>
-          <td><input className="form-control" value={data.shelf}
-                name="shelf" placeholder="Shelf"
-                onChange={(e) => this.handleChange(e, key, index)}/>
-          </td>
-          <td>
-              <select className="form-control" value={data.shelf_depth}
-              onChange={(e) => this.handleChange(e, key, index)} name="shelf_depth">
-                <option value="Front">Front</option>
-                <option value="Middle">Middle</option>
-                <option value="Rear">Rear</option>
-              </select>
-          </td>
-          <td>
-              <select className="form-control" value={data.shelf_position}
-              onChange={(e) => this.handleChange(e, key, index)} name="shelf_position">
-                {options}
-              </select>
-          </td>
-          <td>
-            <button className="btn btn-primary" onClick={(e) => this.props.updateItem(e, key, data.id, index)}>Update</button>
-          </td>  
-          <td>
-            <button className="btn btn-danger" onClick={(e) => {if(confirm('Delete this item?')) {this.props.handleDelete(e, key, data.id, index)}}}>Delete</button>
-          </td>  
-        </tr>
+        <div className="card" key={key}>
+          <div className="card-body">
+            <dl className="row" key={key}>
+              <dt className="col-sm-3">Id</dt>
+              <dd className="col-sm-9">
+                <input className="form-control" disabled value={data.id}
+                  name="id" placeholder="ID"
+                  onChange={(e) => this.handleChange(e, key, index)}/>
+              </dd>            
+              <dt className="col-sm-3">Tray Barcode</dt>
+              <dd className="col-sm-9">
+                <input className="form-control" value={data.boxbarcode}
+                  name="boxbarcode" placeholder="Box Barcode"
+                  onChange={(e) => this.handleChange(e, key, index)}/>
+              </dd>
+              <dt className="col-sm-3">Shelf</dt>
+              <dd className="col-sm-9">
+                <input className="form-control" value={data.shelf}
+                  name="shelf" placeholder="Shelf"
+                  onChange={(e) => this.handleChange(e, key, index)}/>
+              </dd>
+              <dt className="col-sm-3">Depth</dt>
+              <dd className="col-sm-9">
+                <select className="form-control" value={data.shelf_depth}
+                  onChange={(e) => this.handleChange(e, key, index)} name="shelf_depth">
+                  <option value="Front">Front</option>
+                  <option value="Middle">Middle</option>
+                  <option value="Rear">Rear</option>
+                </select>
+              </dd>
+              <dt className="col-sm-3">Position</dt>
+              <dd className="col-sm-9">
+                <select className="form-control" value={data.shelf_position}
+                  onChange={(e) => this.handleChange(e, key, index)} name="shelf_position">
+                  {options}
+                </select>
+              </dd>
+              <dt className="col-sm-3">Added</dt>
+              <dd className="col-sm-9">
+               <input className="form-control" disabled value={data.added} />
+              </dd>
+              <dt className="col-sm-3">Updated</dt>
+              <dd className="col-sm-9">
+               <input className="form-control" disabled value={data.timestamp} />
+            </dd>
+            <dt className="col-sm-3"></dt>
+            <dd className="col-sm-9 d-flex justify-content-end" style={{marginTop: '20px'}}>
+            <div className="btn-group" role="group" aria-label="Option buttons">
+              <button className="btn btn-primary" style={{marginRight: '10px'}} onClick={(e) => this.props.updateItem(e, key, data.id, index)}>Update</button>
+              <button className="btn btn-danger" style={{marginRight: '10px'}} onClick={(e) => {if(confirm('Delete this item?')) {this.props.handleDelete(e, key, data.id, index)}}}>Delete</button>
+            </div>
+            </dd>
+          </dl>
+        </div>
+       </div>     
       )
     }
   
@@ -184,26 +204,13 @@ class ShelfAllEdit extends Component {
     render(){
       const data = this.props.data
       return(
-          <table className="table table-hover tray-table">
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Tray Barcode</th>
-              <th>Shelf Barcode</th>
-              <th>Shelf Depth</th>
-              <th>Shelf Position</th>
-              <th>Update</th>
-              <th>Option</th>
-            </tr>
-          </thead>
-          <tbody>
-          {
-            Object
-            .keys(this.props.data)
-            .map(this.renderDisplay)
-          }
-          </tbody>
-        </table>
+        <div>
+        {
+          Object
+          .keys(this.props.data)
+          .map(this.renderDisplay)
+        }
+      </div>
       )
     }
   }

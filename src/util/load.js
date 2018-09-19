@@ -75,8 +75,7 @@ class Load {
            timestamp: getFormattedDate()
        }
        this.handleUpdate(`${history}create/`, 'POST', historyItems)
-       const update = await this.handleUpdate(inserttrays, 'POST', data)
-       return update
+       return await this.handleUpdate(inserttrays, 'POST', data)
     }
 
     updateTrays = async (data, id) => {
@@ -130,7 +129,7 @@ class Load {
     updateShelf = async (data, id) => {
         const historyItems = {
             action: 'shelf updated',
-            item: data.shelfbarcode,
+            item: data.shelf,
             status_change: 'updated',
             timestamp: getFormattedDate()
         }
@@ -201,7 +200,7 @@ class Load {
                 },
                 body: JSON.stringify(data)
             })
-            this.responseHandling(response)
+           return this.responseHandling(response)
         } catch(e) {
             this.catchError('', e)
         }

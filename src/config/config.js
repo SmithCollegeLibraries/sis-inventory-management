@@ -1,10 +1,3 @@
-export const settings = {
-    'server': 'https://libtools.smith.edu/sis/web/',
-    'barcodeLength' : 8,
-    'start': 'trays'
-}
-
-
 export const month = {
     '1': 'January',
     '2': 'February',

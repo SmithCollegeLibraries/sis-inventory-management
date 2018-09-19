@@ -8,8 +8,8 @@ import { settings } from '../config/config'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Alert from 'react-s-alert';
-import { faBox, faStream, faColumns, faChartBar, faBook, faBookOpen, faQuestionCircle, faSchool, faSearch, faPlusCircle, faEdit, faListAlt, faMinusSquare, faPlusSquare, faCog, faHistory } from '@fortawesome/free-solid-svg-icons'
-library.add(faBox, faStream, faColumns, faChartBar, faBook, faBookOpen, faQuestionCircle, faSchool, faSearch, faPlusCircle, faEdit, faListAlt, faMinusSquare, faPlusSquare, faCog, faHistory)
+import { faBox, faStream, faColumns, faChartBar, faBook, faBookOpen, faQuestionCircle, faSchool, faSearch, faPlusCircle, faEdit, faListAlt, faMinusSquare, faPlusSquare, faCog, faHistory, faCheckCircle, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons'
+library.add(faBox, faStream, faColumns, faChartBar, faBook, faBookOpen, faQuestionCircle, faSchool, faSearch, faPlusCircle, faEdit, faListAlt, faMinusSquare, faPlusSquare, faCog, faHistory, faCheckCircle, faCaretDown, faCaretUp)
 
 const electron = window.require('electron');
 const fs = window.require('fs');
@@ -54,6 +54,7 @@ export default class Main extends Component {
         this.setState({
             display: display
         })
+        location.reload()
     }
 
     updateCollections = () => {

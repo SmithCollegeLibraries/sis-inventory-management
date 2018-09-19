@@ -12,6 +12,9 @@ import ShelfManagement from '../containers/shelfManagement'
 import CollectionManagement from '../containers/collectionManagement'
 import PagingDisplay from '../containers/pagingDisplay'
 import History from '../containers/history'
+import AddPaging from '../containers/addPaging'
+import AddReturn from '../containers/addReturn'
+import TrayShelfManagement from '../containers/trayShelfManagement'
 
 class DisplayComponents extends Component {
     components = {
@@ -27,7 +30,10 @@ class DisplayComponents extends Component {
         shelfManagement: ShelfManagement,
         collectionManagement: CollectionManagement,
         pagingDisplay: PagingDisplay,
-        history: History
+        history: History,
+        addPaging: AddPaging,
+        addReturn: AddReturn,
+        trayShelfManagement: TrayShelfManagement
     };
     render() {
        const TagName = this.components[this.props.tag || 'welcome'];

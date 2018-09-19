@@ -29,20 +29,29 @@ export default class Internal extends Component {
         })
       }
 
-    handleUpdate = (values) => {
-        const update = this.state.data
-        update[`internal${Date.now()}`] = values
-        this.setState({ update}, () => {
-            Load.insertInternalRequest(values)
+    handleUpdate = async (values) => {
+        const update = await Load.insertInternalRequest(values)
+        const retrieve = await ContentSearch.getInternalRequests('false')
+        this.setState({
+            data: retrieve
         })
     }
 
-    archiveRequest = (id, key) => {
+    archiveRequest = async (e, id, key) => {
+        e.preventDefault()
+        Alerts.success('Request has been archived')
+        await Load.archiveInternalRequests(id)
         this.setState((prevState) => ({
             data: prevState.data.filter((_, i) => i != key)
-          }), async () => 
-          await Load.archiveInternalRequests(id)
-        );
+        }));
+        this.getArchiveData()
+    }
+
+    getArchiveData = async () => {
+        const archive = await ContentSearch.getInternalRequests('true')
+        this.setState({
+            archive: archive
+        })
     }
 
     addComment = (comment, key) => {
@@ -81,10 +90,10 @@ export default class Internal extends Component {
               <div className="col-md-8 content-wrapper">
               <ul className="nav nav-tabs">
                 <li className="nav-item">
-                  <a className={this.state.display === 'requests' ? "nav-link active" : "nav-link"} href="/internalrequests" onClick={(e) => this.handleDisplay(e, 'requests')}>Requests</a>
+                  <a className={this.state.display === 'requests' ? "nav-link active" : "nav-link"} href="/internalrequests" onClick={(e) => this.handleDisplay(e, 'requests')}>Requests ({this.state.data ? this.state.data.length : 0})</a>
                 </li>
                 <li className="nav-item">
-                  <a className={this.state.display === 'archive' ? "nav-link active" : "nav-link"}  href="#" onClick={(e) => this.handleDisplay(e, 'archive')}>Archive</a>
+                  <a className={this.state.display === 'archive' ? "nav-link active" : "nav-link"}  href="#" onClick={(e) => this.handleDisplay(e, 'archive')}>Archive ({this.state.archive ? this.state.archive.length : 0})</a>
                 </li>
               </ul>
               {this.state.display === 'requests'
@@ -320,7 +329,7 @@ class RequestInternalDisplay extends Component {
                 })
                 :  ''
               }
-              <button className="btn btn-primary btn option-button" onClick={(e) => this.props.archiveRequest(data.id, key)}>Finished</button>
+              <button className="btn btn-primary btn option-button" onClick={(e) => this.props.archiveRequest(e, data.id, key)}>Finished</button>
             </div>
                 <Comments
                     handleComment={this.props.addComment}

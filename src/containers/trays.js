@@ -4,7 +4,6 @@ import Process from '../components/process'
 import ContentSearch from '../util/search'
 import Updates from '../util/updates'
 import Load from '../util/load'
-import Messages from '../util/messages'
 import Alerts from '../components/alerts'
 import { getFormattedDate } from '../util/date'
 const electron = window.require('electron');
@@ -90,6 +89,7 @@ export default class Trays extends Component {
         }
 
         const results = await Load.insertTrays(values) 
+        console.log(results)
         if(results === 'true'){
             Alerts.success('All items have been processed successfully')
             this.setState({
@@ -97,7 +97,7 @@ export default class Trays extends Component {
             }, () => { Updates.writeToFile(dataLocation, this.state.verifiedBarcodes)})
 
         } else {
-            results.message
+            results && results.message
                 ? Alerts.error(results)
                 : Alerts.duplicate(results[0].boxbarcode, results[0].barcode)
         }
@@ -299,22 +299,37 @@ class TrayDisplay extends Component {
         const bar = this.props.data[key];
         const collections = this.props.collections
         return(
-        <tr key={key}>
-            <td><input type="numbers" className="form-control" value={bar.boxbarcode} name="boxbarcode" placeholder="Box Barcode" onChange={(e) => this.handleChange(e, key, index)} /></td>
-            <td><textarea className="form-control" name="barcodes" value={bar.barcodes} onChange={(e) => this.handleChange(e, key, index)}></textarea></td>
-            <td>
-            <select className="form-control" value={bar.location} onChange={(e) => this.handleChange(e, key, index)} name="location">
-            {
-              Object
-              .keys(collections)
-              .map(function(items, key) {
-                return <option key={key} value={collections[items].name}>{collections[items].name}</option>
-              })
-            }
-            </select></td>
-            <td><input className="form-control" id="disabledInput" type="text" value={bar.timestamp} disabled /></td>
-            <td><button className="btn btn-danger" onClick={() => this.handleDelete(key)}>Delete</button></td>
-        </tr>
+        <div className="card" key={key}>
+            <div className="card-body">
+                <dl className="row" key={key}>
+                    <dt className="col-sm-3">Tray Barcode</dt>
+                    <dd className="col-sm-9">
+                        <input type="numbers" className="form-control" value={bar.boxbarcode} name="boxbarcode" placeholder="Box Barcode" onChange={(e) => this.handleChange(e, key, index)} />
+                    </dd>
+                    <dt className="col-sm-3">Barcodes</dt>
+                    <dd className="col-sm-9">
+                        <textarea className="form-control" name="barcodes" value={bar.barcodes} onChange={(e) => this.handleChange(e, key, index)}></textarea>
+                    </dd>
+                    <dt className="col-sm-3">Location</dt>
+                    <dd className="col-sm-9">
+                         <select className="form-control" value={bar.location} onChange={(e) => this.handleChange(e, key, index)} name="location">
+                        {Object.keys(collections).map(function(items, key) {
+                            return <option key={key} value={collections[items].name}>{collections[items].name}</option>
+                        })
+                        }
+                        </select>
+                    </dd>
+                    <dt className="col-sm-3">Added</dt>
+                    <dd className="col-sm-9">
+                        <input className="form-control" id="disabledInput" type="text" value={bar.timestamp} disabled />
+                    </dd>
+                    <dt className="col-sm-3"></dt>
+                    <dd className="col-sm-9">
+                        <button className="btn btn-danger" onClick={() => this.handleDelete(key)}>Delete</button>
+                    </dd>
+                </dl>
+            </div>
+        </div>        
         )
       }
     
@@ -322,26 +337,13 @@ class TrayDisplay extends Component {
       render(){
         const data = this.props.data || {}  
         return(
-          <span>
-          <table className="table table-hover tray-table">
-            <thead>
-            <tr>
-              <th>Box Barcode</th>
-              <th>Barcodes</th>
-              <th>Location</th>
-              <th>Added</th>
-              <th></th>
-            </tr>
-            </thead>
-            <tbody>
+            <div>
             {
               Object
               .keys(data)
               .map(this.renderDisplay)
             }
-            </tbody>
-          </table>
-          </span>
+            </div>
         )
       }
     }

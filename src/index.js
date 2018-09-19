@@ -1,22 +1,90 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { enableLiveReload } from 'electron-compile';
+require('update-electron-app')()
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let myAppMenu, menuTemplate;
+let path = require('path')
+const template = [
+  {
+      label: 'SIS Inventory Management',
+      submenu: [
+          {role: 'quit'},
+          {role: 'close'}
+      ]
+  },
+  {
+      label: 'Edit',
+      submenu: [
+          { role: 'undo'},
+          { role: 'redo' },
+          { type: 'separator'},
+          { role: 'cut'
+          },
+          {
+              role: 'copy'
+          },
+          {
+              role: 'paste'
+          },
+          {
+              role: 'pasteandmatchstyle'
+          },
+          {
+              role: 'delete'
+          },
+          {
+              role: 'selectall'
+          }
+      ]
+  },
+  {
+      label: 'View',
+      submenu: [
+          {
+              role: 'reload'
+          },
+          {
+              role: 'toggledevtools'
+          },
+          {
+              type: 'separator'
+          },
+          {
+              role: 'resetzoom'
+          },
+          {
+              role: 'zoomin'
+          },
+          {
+              role: 'zoomout'
+          },
+          {
+              type: 'separator'
+          },
+          {
+              role: 'togglefullscreen'
+          }
+      ]
+  },
+];
 
+const menu = Menu.buildFromTemplate(template)
 const isDevMode = process.execPath.match(/[\\/]electron/);
 
 if (isDevMode) enableLiveReload({ strategy: 'react-hmr' });
 
+
 const createWindow = async () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 800,
+    width: 1200,
+    height: 700,
   });
-
+  Menu.setApplicationMenu(menu)
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 

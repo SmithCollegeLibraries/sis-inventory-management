@@ -1,15 +1,30 @@
 import React, { Component } from 'react'
 import ContentSearch from '../util/search'
 import Alerts from '../components/alerts'
+import Load from '../util/load'
+import Updates from '../util/updates'
 import queryString from 'query-string'
+const electron = window.require('electron');
+const fs = window.require('fs');
+const path = window.require('path');
+const fileName = 'paging.json';
+const dataLocation = path.resolve(__dirname, '..','data', fileName);
 
 export default class Search extends Component {
 
     state = {
         searchResults: {},
         searchObject: {},
+        pick: {},
         loading: false,
         searchDisplay: 'title'
+    }
+
+    componentDidMount = async () => {
+        const results = await Load.loadFromFile(dataLocation)
+        this.setState({
+            pick: results,
+        })
     }
 
     handleSearch = async (values) => {
@@ -75,6 +90,18 @@ export default class Search extends Component {
           })
       }
 
+      addToPaging = async (e, barcode) => {
+        e.preventDefault()
+        const data = this.state.pick
+        const search = await ContentSearch.searchAleph(barcode)
+        this.setState(prevState => ({
+          pick: [...prevState.pick, ...search]
+        }), () => {
+          Alerts.success(`${barcode} added to paging slips`)
+          Updates.writeToFile(dataLocation, this.state.pick)
+        })
+      }
+
 
     render(){
         console.log(this.state.searchDisplay)
@@ -94,6 +121,7 @@ export default class Search extends Component {
                         <SearchDisplay
                             searchResults={this.state.searchResults}
                             loading={this.state.loading}
+                            addToPaging={this.addToPaging}
                         />
                     </div>
                 </div>
@@ -179,6 +207,7 @@ class SearchDisplay extends Component {
               </dl>
               </div>
               </div>
+              <button className="btn btn-primary" onClick={(e) => this.props.addToPaging(e, data.barcode)}>Add to Paging</button>
             </div>
             :
             <div className="card-body">

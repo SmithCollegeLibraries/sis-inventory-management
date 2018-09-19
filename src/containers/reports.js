@@ -149,7 +149,7 @@ class DailyDisplay extends Component {
     render(){
         const { data } = this.props || {}
         return(
-            <div className="container">
+            <div className="container-fluid">
                 <h1 className="display-4">Daily report for {data.today}</h1>
                 <table className="table table-hover tray-table">
                     <thead className="thead-light">
@@ -218,7 +218,7 @@ class Tray extends Component {
             }
         });
         return(
-            <div className="container">
+            <div className="container-fluid">
             <h1 className="display-4">{this.props.reportName}</h1>
             <form className="form-inline">
                 <div className="input-group-prepend">
@@ -280,7 +280,7 @@ class Collections extends Component {
             }
         });
         return(
-            <div className="container">
+            <div className="container-fluid">
             <h1 className="display-4">{this.props.reportName}</h1>
             <form className="form-inline">
                 <div className="input-group-prepend">
@@ -341,7 +341,7 @@ class Missing extends Component {
             }
         });
         return(
-            <div className="container">
+            <div className="container-fluid">
             <h1 className="display-4">{this.props.reportName}</h1>    
             <form className="form-inline">
                 <div className="input-group-prepend">

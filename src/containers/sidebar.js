@@ -14,6 +14,7 @@ export default class Sidebar extends Component {
     }
 
     handleMore = (item) => {
+        console.log(item)
         this.setState(prevState => ({
             [item]: !prevState[item]
         }));
@@ -22,7 +23,7 @@ export default class Sidebar extends Component {
     render(){
         console.log(this.props.active)
         return(
-            <nav className="col-sm-3 col-md-2 d-none d-md-block bg-dark sidebar">
+            <nav className="col-sm-2 col-md-2 d-none d-md-block bg-dark sidebar">
                 <div className="sidebar-sticky">
                 {this.props.settings.name ?
                     <ul className="nav flex-column">

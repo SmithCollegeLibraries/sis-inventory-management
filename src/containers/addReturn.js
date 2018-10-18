@@ -77,11 +77,16 @@ export default class AddPaging extends Component {
       getRecords = async () => {
         const data = this.state.add
         const search = await ContentSearch.recordData(queryString.stringify(this.state.searchObject))
+        if(search && search[0] !== false){
         this.setState(prevState => ({
           add: [...prevState.add, ...search],
         }), () => {
           this.order()
         })
+        } else {
+            Alerts.info('Unable to match barcode')
+            this.setState({loading: false})
+        }
       }
 
     removeReturn = (values, index) => {

@@ -14,7 +14,6 @@ export default class Sidebar extends Component {
     }
 
     handleMore = (item) => {
-        console.log(item)
         this.setState(prevState => ({
             [item]: !prevState[item]
         }));

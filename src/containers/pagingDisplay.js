@@ -298,7 +298,7 @@ class SlipsData extends Component {
         timestamp: getFormattedDate()
       }
       if(data.tray_id){
-        const results = await Load.processBarcodes(data.tray_id, data.barcode, data)
+        const results = await Load.processBarcodes(data.tray_id, data.barcode.trim(), data)
       }
       this.props.clearPicks()
     }

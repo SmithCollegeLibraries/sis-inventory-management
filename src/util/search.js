@@ -18,7 +18,8 @@ class ContentSearch {
     }
 
     traymanagement = async (value) => {
-        let search = await this.search(`${managetray}?query=${value}&access-token=${settings.serverToken}`)
+  
+        let search = await this.search(`${managetray}?query=${value.replace(/[^0-9]+/g, '')}&access-token=${settings.serverToken}`)
         return search
     }
 
@@ -28,7 +29,8 @@ class ContentSearch {
     }
 
     traySearch = async (value) => {
-        let search = await this.search(`${traysearch}?query=${value}&access-token=${settings.serverToken}`)
+        value.replace('SM', '')
+        let search = await this.search(`${traysearch}?query=${value.replace(/[^0-9]+/g, '')}&access-token=${settings.serverToken}`)
         return search
     }
 
@@ -48,7 +50,7 @@ class ContentSearch {
     }
 
     searchAleph = async (data) => {
-        let search = await this.search(`${searchaleph}?barcode=${data}&access-token=${settings.serverToken}`)
+        let search = await this.search(`${searchaleph}?${data}&access-token=${settings.serverToken}`)
         return search
     }
 
@@ -58,7 +60,7 @@ class ContentSearch {
     }
 
     trayShelfSearch = async (value) => {
-        let search = await this.search(`${shelfmanagement}?query=${value}&access-token=${settings.serverToken}`)
+        let search = await this.search(`${shelfmanagement}?query=${value.replace(/[^0-9]+/g, '')}&access-token=${settings.serverToken}`)
         return search
     }
 
